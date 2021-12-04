@@ -39,6 +39,8 @@
             this.lbCurrent = new System.Windows.Forms.Label();
             this.btnSubmit = new System.Windows.Forms.Button();
             this.btnNew = new System.Windows.Forms.Button();
+            this.tbCmdOutput = new System.Windows.Forms.TextBox();
+            this.btnBuild = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -53,15 +55,12 @@
             // 
             // lbProject
             // 
-            this.lbProject.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.lbProject.FormattingEnabled = true;
             this.lbProject.ItemHeight = 16;
             this.lbProject.Location = new System.Drawing.Point(14, 29);
             this.lbProject.Margin = new System.Windows.Forms.Padding(4);
             this.lbProject.Name = "lbProject";
-            this.lbProject.Size = new System.Drawing.Size(347, 148);
+            this.lbProject.Size = new System.Drawing.Size(325, 148);
             this.lbProject.TabIndex = 1;
             this.lbProject.SelectedIndexChanged += new System.EventHandler(this.lbProject_SelectedIndexChanged);
             // 
@@ -105,7 +104,7 @@
             this.tbDescript.Location = new System.Drawing.Point(12, 248);
             this.tbDescript.Multiline = true;
             this.tbDescript.Name = "tbDescript";
-            this.tbDescript.Size = new System.Drawing.Size(349, 113);
+            this.tbDescript.Size = new System.Drawing.Size(711, 113);
             this.tbDescript.TabIndex = 5;
             // 
             // lbNew
@@ -148,11 +147,32 @@
             this.btnNew.UseVisualStyleBackColor = true;
             this.btnNew.Click += new System.EventHandler(this.btnNew_Click);
             // 
+            // tbCmdOutput
+            // 
+            this.tbCmdOutput.Location = new System.Drawing.Point(390, 35);
+            this.tbCmdOutput.Multiline = true;
+            this.tbCmdOutput.Name = "tbCmdOutput";
+            this.tbCmdOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.tbCmdOutput.Size = new System.Drawing.Size(333, 184);
+            this.tbCmdOutput.TabIndex = 11;
+            // 
+            // btnBuild
+            // 
+            this.btnBuild.Location = new System.Drawing.Point(290, 196);
+            this.btnBuild.Name = "btnBuild";
+            this.btnBuild.Size = new System.Drawing.Size(75, 23);
+            this.btnBuild.TabIndex = 12;
+            this.btnBuild.Text = "Build";
+            this.btnBuild.UseVisualStyleBackColor = true;
+            this.btnBuild.Click += new System.EventHandler(this.btnBuild_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(369, 403);
+            this.ClientSize = new System.Drawing.Size(731, 403);
+            this.Controls.Add(this.btnBuild);
+            this.Controls.Add(this.tbCmdOutput);
             this.Controls.Add(this.btnNew);
             this.Controls.Add(this.btnSubmit);
             this.Controls.Add(this.lbNew);
@@ -185,6 +205,8 @@
         private System.Windows.Forms.Label lbCurrent;
         private System.Windows.Forms.Button btnSubmit;
         private System.Windows.Forms.Button btnNew;
+        private System.Windows.Forms.TextBox tbCmdOutput;
+        private System.Windows.Forms.Button btnBuild;
     }
 }
 

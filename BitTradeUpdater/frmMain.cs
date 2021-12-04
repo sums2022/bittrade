@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
+using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -134,7 +135,7 @@ namespace BitTradeUpdater
             string project = lbProject.Text;
             if (project != "")
             {
-                MakeProject(project);
+                // MakeProject(project);
                 SummitProject();
             }
         }
@@ -166,6 +167,15 @@ namespace BitTradeUpdater
             // MessageBox.Show(string.Format("Project {0} has been submit", comment));
         }
 
+        private void BuildProject()
+        {
+            ProcessStartInfo Info = new ProcessStartInfo();
+            Info.Arguments = "/C git pull";
+            Info.FileName = "cmd.exe";
+            Info.CreateNoWindow = true;
+            Process.Start(Info);
+        }
+
         private void btnNew_Click(object sender, EventArgs e)
         {
             string[] lines = tbDescript.Lines;
@@ -176,5 +186,22 @@ namespace BitTradeUpdater
                 if (ln != "") tbDescript.Text += ln + "\r\n";
             }
         }
-    }
+
+        private static StringBuilder cmdOutput = null;
+        Process p;
+        StreamWriter SW;
+
+        private void btnBuild_Click(object sender, EventArgs e)
+        {
+            BuildProject();
+        }
+
+        private static void SortOutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
+        {
+            if (!String.IsNullOrEmpty(outLine.Data))
+            {
+                cmdOutput.Append(Environment.NewLine + outLine.Data);
+            }
+        }
+   }
 }
