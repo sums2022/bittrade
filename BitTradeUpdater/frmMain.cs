@@ -11,7 +11,13 @@ namespace BitTradeUpdater
     public partial class frmMain : Form
     {
         const string updateXml = "update.xml";
-        const string serverUri = "https://github.com/sibuzu/NetBackUpdate/raw/main/";
+        const string serverUri = "https://github.com/sums2022/bittrade/raw/main/";
+
+        string projPath = "";
+        string releaseVer = "";
+        string remoteVer = "";
+        string localVer = "";
+
         public frmMain()
         {
             InitializeComponent();
@@ -33,7 +39,7 @@ namespace BitTradeUpdater
         private void lbProject_SelectedIndexChanged(object sender, EventArgs e)
         {
             string project = lbProject.Text;
-            if (project !="")
+            if (project != "")
             {
                 UpdateProjectInfo(project);
             }
@@ -44,24 +50,20 @@ namespace BitTradeUpdater
             XmlDocument xdoc = new XmlDocument();
             xdoc.Load(updateXml);
 
-            lbCurrent.Text = "";
-            lbNew.Text = "";
             tbDescript.Text = "";
 
             XmlNode xn = xdoc.SelectSingleNode("//update[@appID='" + project + "']");
             if (xn == null) return;
 
-            lbCurrent.Text = xn.SelectSingleNode("version").InnerText;
             tbDescript.Text = xn.SelectSingleNode("description").InnerText;
 
-            XmlNode xn2 = xn.SelectSingleNode("files");
-            string exepath = xn2.Attributes["dir"].InnerText;
-            string exename = Path.Combine(exepath, xn.SelectSingleNode("fileName").InnerText);
-            if (File.Exists(exename))
-            {
-                string newVer = GetVersion(exename);
-                lbNew.Text = newVer;
-            }
+            projPath = xn.SelectSingleNode("projPath").InnerText;
+            releaseVer = xn.SelectSingleNode("releaseVersion").InnerText;
+            remoteVer = xn.SelectSingleNode("remoteVersion").InnerText;
+            localVer = GetFlutterVersion(projPath);
+            lbRelease.Text = releaseVer;
+            lbRemote.Text = remoteVer;
+            lbLocal.Text = localVer;
         }
 
         private static string GetVersion(string exename)
@@ -79,55 +81,41 @@ namespace BitTradeUpdater
 
             XmlNode xnode = xdoc.SelectSingleNode("//update[@appID='" + project + "']");
             if (xnode == null)
-            { 
+            {
                 MessageBox.Show("Cannot make project " + project);
                 return;
             }
 
-            string ver = lbNew.Text;
-            string tmppath = "tmp\\" + project;
-            string zipfile = Path.Combine(project, project + "_" + ver + ".zip");
-            Directory.CreateDirectory(project);
-            if (Directory.Exists(tmppath))
-               Directory.Delete(tmppath, true);
+            string projPath = xnode["projPath"].InnerText;
+            string apkFile = Path.Combine(projPath, "build/app/outputs/apk/release/app-release.apk");
+            if (!File.Exists(apkFile))
+            {
+                MessageBox.Show("Cannot make project " + project);
+                return;
+            }
 
-            XmlNode xn2 = xnode.SelectSingleNode("files");
-            string exepath = xn2.Attributes["dir"].InnerText;
-            foreach (XmlNode xn3 in xn2.SelectNodes("file"))
-            {
-                string fname = xn3.InnerText;
-                string src = Path.Combine(exepath, fname);
-                string dst = Path.Combine(tmppath, fname);
-                string p = Path.GetDirectoryName(dst);
-                Directory.CreateDirectory(p);
-                File.Copy(src, dst);
-            }
-            if (File.Exists(zipfile))
-                File.Delete(zipfile);
-           
+            this.remoteVer = this.localVer;
+            string dstFile = string.Format("{0}/{1}_{2}.apk", project, project, remoteVer);
+            File.Copy(apkFile, dstFile, true);
+
             // Update XML
-            xnode["version"].InnerText = ver;
-            xnode["url"].InnerText = serverUri + zipfile.Replace('\\', '/');
+            xnode["remoteVersion"].InnerText = remoteVer;
+            xnode["url"].InnerText = serverUri + dstFile.Replace('\\', '/');
             xnode["description"].InnerText = tbDescript.Text;
-            if (xnode.SelectSingleNode("md5") == null)
-            {
-                xnode.AppendChild(xdoc.CreateElement("md5"));
-            }
-            xnode["md5"].InnerText = CalcMD5(zipfile);
+            xnode["sha256"].InnerText = CalcSha256(dstFile);
 
             xdoc.Save(updateXml);
-            MessageBox.Show(string.Format("Project {0}_{1} is ready to submit", project, ver));
         }
 
-        private string CalcMD5(string fname)
+        private string CalcSha256(string fname)
         {
-            string md5;
+            string sha256;
             using (Stream s = new FileStream(fname, FileMode.Open))
             {
-                byte[] hash = MD5.Create().ComputeHash(s);
-                md5 = BitConverter.ToString(hash).Replace("-", String.Empty).ToLower();
+                byte[] hash = SHA256.Create().ComputeHash(s);
+                sha256 = BitConverter.ToString(hash).Replace("-", String.Empty).ToLower();
             }
-            return md5;
+            return sha256;
         }
 
         private void btnSubmit_Click(object sender, EventArgs e)
@@ -135,7 +123,7 @@ namespace BitTradeUpdater
             string project = lbProject.Text;
             if (project != "")
             {
-                // MakeProject(project);
+                MakeProject(project);
                 SummitProject();
             }
         }
@@ -148,7 +136,7 @@ namespace BitTradeUpdater
 
             if (tbDescript.Lines.Length == 0)
             {
-                comment = string.Format("-m \"{0}_{1}\"", lbProject.Text, lbNew.Text);
+                comment = string.Format("-m \"{0}_{1}\"", lbProject.Text, lbRemote.Text);
             }
             else
             {
@@ -167,20 +155,82 @@ namespace BitTradeUpdater
             // MessageBox.Show(string.Format("Project {0} has been submit", comment));
         }
 
-        private void BuildProject()
+        private void BuildProject(string project)
         {
+            XmlDocument xdoc = new XmlDocument();
+            xdoc.Load(updateXml);
+
+            XmlNode xnode = xdoc.SelectSingleNode("//update[@appID='" + project + "']");
+            if (xnode == null)
+            {
+                MessageBox.Show("Cannot build project " + project);
+                return;
+            }
+
+            string projPath = xnode["projPath"].InnerText;
+            localVer = GetFlutterVersion(projPath, true);
+            lbLocal.Text = localVer;
+
             ProcessStartInfo Info = new ProcessStartInfo();
-            // Info.Arguments = "/C choice /C Y /N /D Y /T 4 & git add -A && git commit -m\".\" & git pull & git push";
-            Info.Arguments = "/C choice /C Y /N /D Y /T 4 & git add -A && git commit -m\".\"";
+            Info.Arguments = string.Format("/C echo BUILD Version={0} & cd \"{1}\" & flutter build apk & pause",
+                this.localVer, projPath);
             Info.FileName = "cmd.exe";
             Info.CreateNoWindow = true;
             Process.Start(Info);
         }
 
+        private String GetFlutterVersion(string projPath, bool inc = false)
+        {
+            string pubspec = Path.Combine(projPath, "pubspec.yaml");
+            StringBuilder sb = new StringBuilder();
+            String line;
+            String ver = "";
+            using (StreamReader sr = new StreamReader(pubspec))
+            {
+                while (!sr.EndOfStream)
+                {
+                    line = sr.ReadLine();
+                    string vv = CheckVersion(line, inc);
+                    if (vv!="")
+                    {
+                        ver = vv;
+                        if (!inc) return ver.Replace('+', '.');
+                        line = "version: " + ver; 
+                    }
+                    sb.AppendLine(line);
+                }
+            }
+            File.WriteAllText("ver.txt", sb.ToString());
+            File.Copy("ver.txt", pubspec, true);
+
+            return ver.Replace('+', '.');
+        }
+
+        private string CheckVersion(string line, bool inc=false)
+        {
+            if (line.Length < 10) return "";
+            if (line.Substring(0, 8) != "version:") return "";
+
+            string[] vers = line.Substring(8).Split(new char[] { '.', '+' });
+            int nver = 0;
+            for (int i=0; i<vers.Length; ++i)
+            {
+                nver += int.Parse(vers[i]);
+                if (i < 2) nver *= 10;
+                else if (i == 2) nver *= 100;
+            }
+
+            if (inc) nver += 1;
+            string strVer = string.Format("{0}.{1}.{2}+{3}",
+                nver / 10000, nver / 1000 % 10, nver / 100 % 10, nver % 100);
+
+            return strVer;
+        }
+
         private void btnNew_Click(object sender, EventArgs e)
         {
             string[] lines = tbDescript.Lines;
-            tbDescript.Text = lbNew.Text + ":\r\n";
+            tbDescript.Text = lbRemote.Text + ":\r\n";
             for (int i = 1; i < lines.Length; ++i)
             {
                 string ln = lines[i].Trim();
@@ -188,21 +238,13 @@ namespace BitTradeUpdater
             }
         }
 
-        private static StringBuilder cmdOutput = null;
-        Process p;
-        StreamWriter SW;
-
         private void btnBuild_Click(object sender, EventArgs e)
         {
-            BuildProject();
-        }
-
-        private static void SortOutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
-        {
-            if (!String.IsNullOrEmpty(outLine.Data))
+            string project = lbProject.Text;
+            if (project != "")
             {
-                cmdOutput.Append(Environment.NewLine + outLine.Data);
+                BuildProject(project);
             }
         }
-   }
+    }
 }

@@ -1,17 +1,12 @@
 <?xml version="1.0"?>
 <NetbackUpdate>
-  <update appID="NetBack">
-    <version>v21.07.10.02859</version>
-    <url>https://github.com/sibuzu/NetBackUpdate/raw/main/NetBack/NetBack_v21.07.10.02859.zip</url>
-    <fileName>NetBack.exe</fileName>
-    <description>v21.07.10.02859:
-* NetBack test4
-</description>
-    <launchArgs>
-    </launchArgs>
-    <files dir="..\NetBack\NetBack\bin\Debug\">
-      <file>NetBack.exe</file>
-    </files>
-    <md5>2029015834a99bd9f65e20a1235e3fb9</md5>
+  <update appID="BitTrade2">
+    <releaseVersion>2.0.0.2</releaseVersion>
+    <remoteVersion>2.0.0.14</remoteVersion>
+    <url>https://github.com/sums2022/bittrade/raw/main/BitTrade2/BitTrade2_2.0.0.14.apk</url>
+    <projPath>..\bittrade2\</projPath>
+    <description>
+    </description>
+    <sha256>6120c199ff5339391071e5a6c5a5adfec63fc446e42afee62104b26094dc12a6</sha256>
   </update>
 </NetbackUpdate>
