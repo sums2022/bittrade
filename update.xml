@@ -5,8 +5,7 @@
     <remoteVersion>2.0.0.14</remoteVersion>
     <url>https://github.com/sums2022/bittrade/raw/main/BitTrade2/BitTrade2_2.0.0.14.apk</url>
     <projPath>..\bittrade2\</projPath>
-    <description>
-    </description>
+    <description>Remote Descript</description>
     <sha256>6120c199ff5339391071e5a6c5a5adfec63fc446e42afee62104b26094dc12a6</sha256>
   </update>
 </NetbackUpdate>

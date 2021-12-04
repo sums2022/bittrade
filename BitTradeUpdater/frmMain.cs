@@ -95,6 +95,7 @@ namespace BitTradeUpdater
             }
 
             this.remoteVer = this.localVer;
+            lbRemote.Text = this.remoteVer;
             string dstFile = string.Format("{0}/{1}_{2}.apk", project, project, remoteVer);
             File.Copy(apkFile, dstFile, true);
 
