@@ -170,7 +170,8 @@ namespace BitTradeUpdater
         private void BuildProject()
         {
             ProcessStartInfo Info = new ProcessStartInfo();
-            Info.Arguments = "/C choice /C Y /N /D Y /T 4 & git add -A && git commit -m\".\" & git pull & git push";
+            // Info.Arguments = "/C choice /C Y /N /D Y /T 4 & git add -A && git commit -m\".\" & git pull & git push";
+            Info.Arguments = "/C choice /C Y /N /D Y /T 4 & git add -A && git commit -m\".\"";
             Info.FileName = "cmd.exe";
             Info.CreateNoWindow = true;
             Process.Start(Info);
